@@ -1,24 +1,60 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import './App.css';
 
 function App() {
-    const [todos, setTodos] = useState([
-        { id: 1, text: 'Test 1' },
-        { id: 2, text: 'Test 2' }
-    ]);
+    const [todos, setTodos] = useState([]);
 
-    const addTodo = () => {
-        const newTodo = { id: Date.now(), text: 'Todo eintragen' };
-        setTodos([...todos, newTodo]);
+    useEffect(() => {
+        const fetchTodos = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/todos');
+                setTodos(response.data);
+            } catch (error) {
+                console.error('Error fetching todos:', error);
+            }
+        };
+
+        fetchTodos();
+    }, []);
+
+    const addTodo = async () => {
+        try {
+            const response = await axios.post('http://localhost:3001/todos', { text: 'Todo eintragen' });
+            setTodos([...todos, response.data]);
+            console.log('Todo added:', response.data);
+        } catch (error) {
+            console.error('Error adding todo:', error);
+        }
     };
 
-    const changeTodo = (id) => {
+    const toggleTodo = async (id, checked) => {
+        try {
+            await axios.put(`http://localhost:3001/todos/${id}`, { completed: !checked }); // Umkehrung des aktuellen Status
+            setTodos(todos.map(todo => todo.id === id ? { ...todo, completed: !checked } : todo));
+        } catch (error) {
+            console.error('Error toggling todo:', error);
+        }
+    };
+
+
+    const changeTodo = async (id) => {
         const newText = prompt('Text eingeben: ');
-        setTodos(todos.map(todo => todo.id === id ? { ...todo, text: newText } : todo));
+        try {
+            const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: newText });
+            setTodos(todos.map(todo => todo.id === id ? response.data : todo));
+        } catch (error) {
+            console.error('Error updating todo:', error);
+        }
     };
 
-    const deleteTodo = (id) => {
-        setTodos(todos.filter(todo => todo.id !== id));
+    const deleteTodo = async (id) => {
+        try {
+            await axios.delete(`http://localhost:3001/todos/${id}`);
+            setTodos(todos.filter(todo => todo.id !== id));
+        } catch (error) {
+            console.error('Error deleting todo:', error);
+        }
     };
 
     return (
@@ -31,7 +67,12 @@ function App() {
                 {todos.map(todo => (
                     <div key={todo.id} className="todo-item">
                         <span className="todo-text">{todo.text}</span>
-                        <input type="checkbox" className="todo-checkbox" />
+                        <input
+                            type="checkbox"
+                            className="todo-checkbox"
+                            checked={!!todo.completed} // sicherstellen, dass es ein Boolescher Wert ist
+                            onChange={(e) => toggleTodo(todo.id, e.target.checked)}
+                        />
                         <div className="todo-buttons">
                             <button onClick={() => changeTodo(todo.id)}>Change</button>
                             <button onClick={() => deleteTodo(todo.id)}>Delete</button>
