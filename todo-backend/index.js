@@ -49,16 +49,16 @@ app.post('/todos', async (req, res) => {
 //aktualisiert to-dos anhand der id
 app.put('/todos/:id', async (req, res) => {
     const { id } = req.params;
-    const { text } = req.body;
+    const { text, completed } = req.body;
 
-    if (!text) {
-        return res.status(400).json({ error: 'Text muss angegeben werden' });
+    if (text === undefined || completed === undefined) {
+        return res.status(400).json({ error: 'Text und completed müssen angegeben werden' });
     }
 
     try {
         const result = await pool.query(
-            'UPDATE todos SET text = $1 WHERE id = $2 RETURNING *',
-            [text, id]
+            'UPDATE todos SET text = $1, completed = $2 WHERE id = $3 RETURNING *',
+            [text, completed, id]
         );
         res.json(result.rows[0]);
     } catch (err) {
@@ -67,6 +67,7 @@ app.put('/todos/:id', async (req, res) => {
     }
     console.log('PUT-Anfrage für Todo mit ID:', id);
     console.log('Neuer Text:', text);
+    console.log('Neuer completed Status:', completed);
 });
 
 

@@ -29,7 +29,7 @@ function App() {
         }
     };
 
-    const toggleTodo = async (id, checked) => {
+    const toggleTodo = async (id, completed) => {
         const todo = todos.find(todo => todo.id === id);
         if (!todo) {
             console.error('Todo not found');
@@ -37,8 +37,8 @@ function App() {
         }
 
         try {
-            console.log(`Toggling todo: ${id}, current completed: ${checked}`);
-            const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: todo.text, completed: !checked });
+            console.log(`Toggling todo: ${id}, current completed: ${completed}`);
+            const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: todo.text, completed: !completed });
             console.log('Toggle response:', response.data);
 
             setTodos(todos.map(todo => todo.id === id ? response.data : todo));
