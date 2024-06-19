@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 
 const pool = new Pool({
     user: 'mustermann',
-    host: 'localhost',
+    host: 'database',
     database: 'todoapp',
     password: 'mustermann',
     port: 5432,
@@ -49,15 +49,27 @@ app.post('/todos', async (req, res) => {
 //aktualisiert to-dos anhand der id
 app.put('/todos/:id', async (req, res) => {
     const { id } = req.params;
-    const { text, completed } = req.body; // Nehmen Sie den neuen Status der Checkbox entgegen
+    const { text } = req.body;
+
+    if (!text) {
+        return res.status(400).json({ error: 'Text muss angegeben werden' });
+    }
+
     try {
-        const result = await pool.query('UPDATE todos SET text = $1, completed = $2 WHERE id = $3 RETURNING *', [text, completed, id]);
+        const result = await pool.query(
+            'UPDATE todos SET text = $1 WHERE id = $2 RETURNING *',
+            [text, id]
+        );
         res.json(result.rows[0]);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Fehler beim Aktualisieren des Todos:', err);
+        res.status(500).json({ error: 'Interner Serverfehler' });
     }
+    console.log('PUT-Anfrage für Todo mit ID:', id);
+    console.log('Neuer Text:', text);
 });
+
+
 
 //löscht todos
 app.delete('/todos/:id', async (req, res) => {

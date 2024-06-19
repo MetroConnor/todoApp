@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: mustermann
+      POSTGRES_PASSWORD: mustermann
+      POSTGRES_DB: todoapp
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - todoapp-network
+
+  backend:
+    build: ./todo-backend
+    ports:
+      - "3001:3001"
+    depends_on:
+      - database
+    environment:
+      PGUSER: mustermann
+      PGHOST: database
+      PGDATABASE: todoapp
+      PGPASSWORD: mustermann
+      PGPORT: 5432
+    networks:
+      - todoapp-network
+    volumes:
+      - ./todo-backend:/app
+      - ./migrations:/app/migrations
+
+  frontend:
+    build: ./todo-app
+    ports:
+      - "3000:3000"
+    networks:
+      - todoapp-network
+
+networks:
+  todoapp-network:
+
+volumes:
+  db-data:

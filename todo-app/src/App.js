@@ -5,6 +5,7 @@ import './App.css';
 function App() {
     const [todos, setTodos] = useState([]);
 
+    //lädt To-Do Daten vom lokalen Server und setzt den State
     useEffect(() => {
         const fetchTodos = async () => {
             try {
@@ -29,24 +30,40 @@ function App() {
     };
 
     const toggleTodo = async (id, checked) => {
+        const todo = todos.find(todo => todo.id === id);
+        if (!todo) {
+            console.error('Todo not found');
+            return;
+        }
+
         try {
-            await axios.put(`http://localhost:3001/todos/${id}`, { completed: !checked }); // Umkehrung des aktuellen Status
-            setTodos(todos.map(todo => todo.id === id ? { ...todo, completed: !checked } : todo));
+            console.log(`Toggling todo: ${id}, current completed: ${checked}`);
+            const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: todo.text, completed: !checked });
+            console.log('Toggle response:', response.data);
+
+            setTodos(todos.map(todo => todo.id === id ? response.data : todo));
         } catch (error) {
             console.error('Error toggling todo:', error);
         }
     };
 
 
+
+
     const changeTodo = async (id) => {
-        const newText = prompt('Text eingeben: ');
+        const newText = prompt('Neuen Text eingeben: ');
+        if (!newText) return; // Abbrechen, wenn kein Text eingegeben wurde
         try {
             const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: newText });
             setTodos(todos.map(todo => todo.id === id ? response.data : todo));
         } catch (error) {
-            console.error('Error updating todo:', error);
+            console.error('Fehler beim Aktualisieren des Todos:', error);
         }
+        console.log('ID des Todos:', id);
+        console.log('Neuer Text:', newText);
     };
+
+
 
     const deleteTodo = async (id) => {
         try {
@@ -70,8 +87,8 @@ function App() {
                         <input
                             type="checkbox"
                             className="todo-checkbox"
-                            checked={!!todo.completed} // sicherstellen, dass es ein Boolescher Wert ist
-                            onChange={(e) => toggleTodo(todo.id, e.target.checked)}
+                            checked={todo.completed} // kein Typumwandlung erforderlich, da `completed` bereits ein Boolescher Wert sein sollte
+                            onChange={(e) => toggleTodo(todo.id, todo.completed)} // Übergebe den aktuellen Status
                         />
                         <div className="todo-buttons">
                             <button onClick={() => changeTodo(todo.id)}>Change</button>

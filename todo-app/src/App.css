@@ -25,7 +25,7 @@
 }
 
 .todo-list {
-  margin-left: 100px;
+  margin-left: 200px;
   margin-top: 50px;
   text-align: left;
 }
@@ -35,6 +35,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  margin-right: 200px;
 }
 
 .todo-text {
@@ -62,10 +63,6 @@
   background-color: #d58c35;
   border-radius: 10px;
   margin: 5px;
-}
-
-.todo-list button:nth-child(2) {
-  margin-right: 100px;
 }
 
 .todo-list button:nth-child(1) {
