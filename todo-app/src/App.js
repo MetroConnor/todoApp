@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 function App() {
     const [todos, setTodos] = useState([]);
 
-    //lädt To-Do Daten vom lokalen Server und setzt den State
     useEffect(() => {
         const fetchTodos = async () => {
             try {
@@ -21,9 +21,17 @@ function App() {
 
     const addTodo = async () => {
         try {
-            const response = await axios.post('http://localhost:3001/todos', { text: 'Todo eintragen' });
-            setTodos([...todos, response.data]);
-            console.log('Todo added:', response.data);
+            const response = await axios.post('http://localhost:3001/todos', { text: 'New Todo' });
+            const newTodo = response.data;
+
+            // Prompt for new text and update the new Todo's text
+            const newText = prompt('Neuen Text eingeben: ', 'New Todo');
+            if (newText) {
+                const updatedResponse = await axios.put(`http://localhost:3001/todos/${newTodo.id}`, { text: newText, completed: false });
+                setTodos([...todos, updatedResponse.data]);
+            } else {
+                setTodos([...todos, newTodo]);
+            }
         } catch (error) {
             console.error('Error adding todo:', error);
         }
@@ -37,22 +45,16 @@ function App() {
         }
 
         try {
-            console.log(`Toggling todo: ${id}, current completed: ${completed}`);
             const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: todo.text, completed: !completed });
-            console.log('Toggle response:', response.data);
-
             setTodos(todos.map(todo => todo.id === id ? response.data : todo));
         } catch (error) {
             console.error('Error toggling todo:', error);
         }
     };
 
-
-
-
     const changeTodo = async (id) => {
         const newText = prompt('Neuen Text eingeben: ');
-        if (!newText) return; // Abbrechen, wenn kein Text eingegeben wurde
+        if (!newText) return;
         try {
             const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: newText });
             setTodos(todos.map(todo => todo.id === id ? response.data : todo));
@@ -62,8 +64,6 @@ function App() {
         console.log('ID des Todos:', id);
         console.log('Neuer Text:', newText);
     };
-
-
 
     const deleteTodo = async (id) => {
         try {
@@ -75,27 +75,31 @@ function App() {
     };
 
     return (
-        <div className="App">
-            <div className="navbar">
-                <h1>My ToDo List!</h1>
-                <button onClick={addTodo}>Create</button>
-            </div>
-            <div className="todo-list">
-                {todos.map(todo => (
-                    <div key={todo.id} className="todo-item">
-                        <span className="todo-text">{todo.text}</span>
-                        <input
-                            type="checkbox"
-                            className="todo-checkbox"
-                            checked={todo.completed} // kein Typumwandlung erforderlich, da `completed` bereits ein Boolescher Wert sein sollte
-                            onChange={(e) => toggleTodo(todo.id, todo.completed)} // Übergebe den aktuellen Status
-                        />
-                        <div className="todo-buttons">
-                            <button onClick={() => changeTodo(todo.id)}>Change</button>
-                            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
-                        </div>
+        <div className="container mt-5">
+            <div className="card shadow-sm">
+                <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h1 className="h4 m-0">My ToDo List</h1>
+                    <button className="btn btn-light btn-sm ms-auto me-2" onClick={addTodo}>Create</button>
+                </div>
+                <div className="card-body">
+                    <div className="list-group">
+                        {todos.map(todo => (
+                            <div key={todo.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                <span className="todo-text">{todo.text}</span>
+                                <div className="d-flex align-items-center">
+                                    <input
+                                        type="checkbox"
+                                        className="form-check-input me-3"
+                                        checked={todo.completed}
+                                        onChange={() => toggleTodo(todo.id, todo.completed)}
+                                    />
+                                    <button className="btn btn-warning btn-sm me-2 custom-change-btn" onClick={() => changeTodo(todo.id)}>Change</button>
+                                    <button className="btn btn-danger btn-sm" onClick={() => deleteTodo(todo.id)}>Delete</button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
         </div>
     );
