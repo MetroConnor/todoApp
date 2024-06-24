@@ -56,7 +56,7 @@ function App() {
         const newText = prompt('Neuen Text eingeben: ');
         if (!newText) return;
         try {
-            const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: newText });
+            const response = await axios.put(`http://localhost:3001/todos/${id}`, { text: newText, completed: false });
             setTodos(todos.map(todo => todo.id === id ? response.data : todo));
         } catch (error) {
             console.error('Fehler beim Aktualisieren des Todos:', error);
