@@ -1,0 +1,40 @@
+This API provides CRUD (Create, Read, Update, Delete) operations for managing a ToDo list. The service is built with Node.js and Express and uses PostgreSQL as the database.
+Base-URL: localhost:3001
+
+# Endpoint: "/todos"
+
+## Methods:
+
+### GET:
+
+Description:
+Fetches all ToDo items from the database
+
+Response:
+JSON Array of ToDo objects
+
+### POST:
+
+Description:
+Creates a new ToDo item and inserts it into the database
+
+Response: 
+JSON object of the created ToDo
+
+# Endpoint: "/todos/:id
+
+### PUT:
+
+Description:
+Updates the text and/or the completed status of an existing ToDo
+
+Response:
+Updated Json object of the created ToDo
+
+### DELETE:
+
+Description:
+Deletes a ToDo from database
+
+Response:
+"message": "ToDo deleted"
