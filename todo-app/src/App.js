@@ -93,7 +93,7 @@ function App() {
                                         checked={todo.completed}
                                         onChange={() => toggleTodo(todo.id, todo.completed)}
                                     />
-                                    <button className="btn btn-warning btn-sm me-2 custom-change-btn" onClick={() => changeTodo(todo.id)}>Change</button>
+                                    <button className="btn btn-warning btn-sm me-2 custom-change-btn" onClick={() => changeTodo(todo.id)}>Update</button>
                                     <button className="btn btn-danger btn-sm" onClick={() => deleteTodo(todo.id)}>Delete</button>
                                 </div>
                             </div>
