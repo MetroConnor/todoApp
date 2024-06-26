@@ -1,0 +1,9 @@
+-- 20240626_add_user_id_to_todos.sql
+
+ALTER TABLE todos
+ADD COLUMN user_id INTEGER NOT NULL,
+ADD CONSTRAINT fk_user
+  FOREIGN KEY (user_id)
+  REFERENCES users (id)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;

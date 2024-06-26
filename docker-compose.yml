@@ -14,6 +14,7 @@ services:
       - "5432:5432"
     networks:
       - todoapp-network
+    restart: always
 
   backend:
     build: ./todo-backend
@@ -29,9 +30,7 @@ services:
       PGPORT: 5432
     networks:
       - todoapp-network
-    volumes:
-      - ./todo-backend:/app
-      - ./migrations:/app/migrations
+    restart: always
 
   frontend:
     build: ./todo-app
@@ -39,6 +38,7 @@ services:
       - "3000:3000"
     networks:
       - todoapp-network
+    restart: always
 
 networks:
   todoapp-network:
