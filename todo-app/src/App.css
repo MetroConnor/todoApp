@@ -25,3 +25,7 @@
 .align-self-start {
   align-self: start;
 }
+
+.btn-primary {
+  margin-bottom: 40px;
+}
