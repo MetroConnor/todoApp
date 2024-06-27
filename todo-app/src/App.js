@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+// Für HTTP Requests
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -10,12 +11,14 @@ function App() {
     const [showInput, setShowInput] = useState(false);
     const [newTodoText, setNewTodoText] = useState('');
 
+    // Überprüft den Token und lädt die To-Dos vom Server
     useEffect(() => {
         if (token) {
             (async () => await fetchTodos())();
         }
     }, [token]);
 
+    // Ruft To-Dos vom Server ab und speichert Sie im State todos
     const fetchTodos = async () => {
         try {
             const response = await axios.get('http://localhost:3001/todos', {
@@ -27,6 +30,7 @@ function App() {
         }
     };
 
+    // POST-Anfrage an Server um todos hinzuzufügen
     const addTodo = async () => {
         try {
             const response = await axios.post('http://localhost:3001/todos', { text: newTodoText }, {
@@ -40,6 +44,7 @@ function App() {
         }
     };
 
+    // Setzt den "completed" Status eines todos fest (benötigt für die Checkboxen)
     const toggleTodo = async (id, completed) => {
         const todo = todos.find(todo => todo.id === id);
         if (!todo) {
@@ -57,6 +62,7 @@ function App() {
         }
     };
 
+    // Ermöglicht die Änderung des Textes eines todos
     const changeTodo = async (id) => {
         const newText = prompt('Enter new text:');
         if (!newText) return;
@@ -71,6 +77,7 @@ function App() {
         }
     };
 
+    // Löscht die jeweiligen todos und aktualisiert den State
     const deleteTodo = async (id) => {
         try {
             await axios.delete(`http://localhost:3001/todos/${id}`, {
@@ -82,6 +89,7 @@ function App() {
         }
     };
 
+    // Loggt den User ein und speichert den Token im localStorage und im State
     const handleLogin = async (username, password) => {
         try {
             const response = await axios.post('http://localhost:3001/login', { username, password });
@@ -95,6 +103,7 @@ function App() {
         }
     };
 
+    // Ermöglicht Registrierung und loggt Benutzer direkt ein
     const handleRegister = async (username, password, role) => {
         try {
             await axios.post('http://localhost:3001/register', { username, password, role });
@@ -104,6 +113,7 @@ function App() {
         }
     };
 
+    // Loogt den Benutzer aus indem der State zurückgesetzt wird
     const handleLogout = () => {
         setToken('');
         localStorage.removeItem('token');
@@ -111,6 +121,7 @@ function App() {
         setTodos([]);
     };
 
+    // Dient der Fehlerbehandlung bzw. der entsprechenden Ausgabe
     const handleRequestError = (error) => {
         console.error('Request error:', error);
         if (error.response) {
@@ -128,6 +139,7 @@ function App() {
         }
     };
 
+    // Wenn User nicht eingeloogt ist, zeige Login und Registrierung, ansonsten "To-Do" UI
     return (
         <div className="container mt-5">
             {!user ? (
@@ -186,6 +198,7 @@ function App() {
     );
 }
 
+// Zeigt das Login Formular und ruft onLogin auf, wenn das Formular abgeschickt wird
 function Login({ onLogin }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -220,6 +233,7 @@ function Login({ onLogin }) {
     );
 }
 
+// Zeigt Registrierungsformular und ruft onRegister auf, wenn das Formular abgeschickt wird
 function Register({ onRegister }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');

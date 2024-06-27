@@ -1,13 +1,20 @@
+// Web-Framework für Node.js
 const express = require('express');
+// Bibliothek zum Hashing von Passwörtern
 const bcrypt = require('bcryptjs');
+// Bibliothek zum erstellen und Verifizieren von JSON Web Tokens
 const jwt = require('jsonwebtoken');
+// PostgreSQL-Client für Node.js
 const { Pool } = require('pg');
+// Middleware für Cross-Origin Ressource Sharing
 const cors = require('cors');
+// Middleware zum parsen von JSON-Request Bodies
 const bodyParser = require('body-parser');
 
 const app = express();
 const port = 3001;
 
+// Konfiguriert den PSQL-Client mit Standardwerten
 const pool = new Pool({
     user: process.env.PGUSER || 'mustermann',
     host: process.env.PGHOST || 'database',
@@ -19,10 +26,10 @@ const pool = new Pool({
 app.use(cors());
 app.use(bodyParser.json());
 
-// Secret Key for JWT
+// Key zur Signierung und Verifizierung von JWT`s
 const JWT_SECRET = 't&5*P$5QwA!R%8e@U6sY';
 
-// Middleware for token verification
+// Überprüft die Gültigkeit eines JWTs im Authorization Header
 const verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
 
@@ -40,7 +47,7 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// User registration
+// Registriert den Benutzer indem das Passwort und die Rolle in die Datenbank eingefügt wird
 app.post('/register', async (req, res) => {
     const { username, password, role } = req.body;
 
@@ -57,7 +64,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// User login
+// Authentifiziert einen Benutzer durch Überprüfung des Benutzernamen und Passworts und gibt ein JWT zurück
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -71,7 +78,7 @@ app.post('/login', async (req, res) => {
 
         const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
-        // Ausgabe des Tokens auf der Konsole zur Überprüfung
+        //Ausgabe des Tokens auf der Konsole zur Überprüfung
         console.log('Token:', token);
 
         res.json({ token });
@@ -81,7 +88,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Get todos
+// Gibt alle vorhandenen todos zurück wenn der Benutzer ein Admin ist, anonsten nur todos des angemeldeten Benutzers
 app.get('/todos', verifyToken, async (req, res) => {
     try {
         let result;
@@ -97,7 +104,7 @@ app.get('/todos', verifyToken, async (req, res) => {
     }
 });
 
-// Create todo
+// Fügt neue todos in die Datenbank ein
 app.post('/todos', verifyToken, async (req, res) => {
     const { text } = req.body;
     const userId = req.userId;
@@ -118,7 +125,7 @@ app.post('/todos', verifyToken, async (req, res) => {
     }
 });
 
-// Update todo
+// Aktualisiert todos in der Datenbank
 app.put('/todos/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     const { text, completed } = req.body;
@@ -147,7 +154,7 @@ app.put('/todos/:id', verifyToken, async (req, res) => {
     }
 });
 
-// Delete todo
+// löscht todos in der Datenbank
 app.delete('/todos/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
 

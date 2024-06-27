@@ -1,7 +1,8 @@
-// migrate.js
-
+// Modul zum lesen und schreiben von Dateien
 const fs = require('fs');
+// Modul zum arbeiten mit Dateipfaden
 const path = require('path');
+//PSQL Client für Node.js
 const { Pool } = require('pg');
 
 const pool = new Pool({
