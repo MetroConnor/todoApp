@@ -29,3 +29,8 @@
 .btn-primary {
   margin-bottom: 40px;
 }
+
+.todo-username {
+  color: #333333; /* Dunkelgrau */
+  font-weight: bold; /* Fettdruck */
+}

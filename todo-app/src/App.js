@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// Für HTTP Requests
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -11,14 +10,12 @@ function App() {
     const [showInput, setShowInput] = useState(false);
     const [newTodoText, setNewTodoText] = useState('');
 
-    // Überprüft den Token und lädt die To-Dos vom Server
     useEffect(() => {
         if (token) {
-            (async () => await fetchTodos())();
+            fetchTodos();
         }
     }, [token]);
 
-    // Ruft To-Dos vom Server ab und speichert Sie im State todos
     const fetchTodos = async () => {
         try {
             const response = await axios.get('http://localhost:3001/todos', {
@@ -30,7 +27,6 @@ function App() {
         }
     };
 
-    // POST-Anfrage an Server um todos hinzuzufügen
     const addTodo = async () => {
         try {
             const response = await axios.post('http://localhost:3001/todos', { text: newTodoText }, {
@@ -44,7 +40,6 @@ function App() {
         }
     };
 
-    // Setzt den "completed" Status eines todos fest (benötigt für die Checkboxen)
     const toggleTodo = async (id, completed) => {
         const todo = todos.find(todo => todo.id === id);
         if (!todo) {
@@ -62,7 +57,6 @@ function App() {
         }
     };
 
-    // Ermöglicht die Änderung des Textes eines todos
     const changeTodo = async (id) => {
         const newText = prompt('Enter new text:');
         if (!newText) return;
@@ -77,7 +71,6 @@ function App() {
         }
     };
 
-    // Löscht die jeweiligen todos und aktualisiert den State
     const deleteTodo = async (id) => {
         try {
             await axios.delete(`http://localhost:3001/todos/${id}`, {
@@ -89,21 +82,19 @@ function App() {
         }
     };
 
-    // Loggt den User ein und speichert den Token im localStorage und im State
     const handleLogin = async (username, password) => {
         try {
             const response = await axios.post('http://localhost:3001/login', { username, password });
             const token = `Bearer ${response.data.token}`;
             setToken(token);
             localStorage.setItem('token', token);
-            setUser({ username });
+            setUser({ username, role: response.data.role });
             await fetchTodos();
         } catch (error) {
             console.error('Error logging in:', error);
         }
     };
 
-    // Ermöglicht Registrierung und loggt Benutzer direkt ein
     const handleRegister = async (username, password, role) => {
         try {
             await axios.post('http://localhost:3001/register', { username, password, role });
@@ -113,7 +104,6 @@ function App() {
         }
     };
 
-    // Loogt den Benutzer aus indem der State zurückgesetzt wird
     const handleLogout = () => {
         setToken('');
         localStorage.removeItem('token');
@@ -121,7 +111,6 @@ function App() {
         setTodos([]);
     };
 
-    // Dient der Fehlerbehandlung bzw. der entsprechenden Ausgabe
     const handleRequestError = (error) => {
         console.error('Request error:', error);
         if (error.response) {
@@ -139,7 +128,6 @@ function App() {
         }
     };
 
-    // Wenn User nicht eingeloogt ist, zeige Login und Registrierung, ansonsten "To-Do" UI
     return (
         <div className="container mt-5">
             {!user ? (
@@ -174,22 +162,27 @@ function App() {
                                 </div>
                             )}
                             <div className="list-group">
-                            {todos.map(todo => (
-                                <div key={todo.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                    <span className="todo-text">{todo.text}</span>
-                                    <div className="d-flex align-items-center">
-                                        <input
-                                            type="checkbox"
-                                            className="form-check-input me-3"
-                                            checked={todo.completed}
-                                            onChange={() => toggleTodo(todo.id, todo.completed)}
-                                        />
-                                        <button className="btn btn-warning btn-sm me-2 custom-change-btn" onClick={() => changeTodo(todo.id)}>Update</button>
-                                        <button className="btn btn-danger btn-sm" onClick={() => deleteTodo(todo.id)}>Delete</button>
+                                {todos.map(todo => (
+                                    <div key={todo.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                        <div className="d-flex flex-column">
+                                            <span className="todo-text">{todo.text}</span>
+                                            {user && user.role !== 'user' && (
+                                                <small className="text-muted">User: {todo.username}</small>
+                                            )}
+                                        </div>
+                                        <div className="d-flex align-items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="form-check-input me-3"
+                                                checked={todo.completed}
+                                                onChange={() => toggleTodo(todo.id, todo.completed)}
+                                            />
+                                            <button className="btn btn-warning btn-sm me-2 custom-change-btn" onClick={() => changeTodo(todo.id)}>Update</button>
+                                            <button className="btn btn-danger btn-sm" onClick={() => deleteTodo(todo.id)}>Delete</button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -198,7 +191,6 @@ function App() {
     );
 }
 
-// Zeigt das Login Formular und ruft onLogin auf, wenn das Formular abgeschickt wird
 function Login({ onLogin }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -233,7 +225,6 @@ function Login({ onLogin }) {
     );
 }
 
-// Zeigt Registrierungsformular und ruft onRegister auf, wenn das Formular abgeschickt wird
 function Register({ onRegister }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -267,11 +258,12 @@ function Register({ onRegister }) {
             <div className="mb-3">
                 <label className="form-label">Role</label>
                 <select
-                    className="form-select"
+                    className="form-control"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
                 >
                     <option value="user">User</option>
+                    <option value="admin">Admin</option>
                 </select>
             </div>
             <button type="submit" className="btn btn-primary">Register</button>

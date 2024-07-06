@@ -2,13 +2,13 @@
 const express = require('express');
 // Bibliothek zum Hashing von Passwörtern
 const bcrypt = require('bcryptjs');
-// Bibliothek zum erstellen und Verifizieren von JSON Web Tokens
+// Bibliothek zum Erstellen und Verifizieren von JSON Web Tokens
 const jwt = require('jsonwebtoken');
 // PostgreSQL-Client für Node.js
 const { Pool } = require('pg');
 // Middleware für Cross-Origin Ressource Sharing
 const cors = require('cors');
-// Middleware zum parsen von JSON-Request Bodies
+// Middleware zum Parsen von JSON-Request Bodies
 const bodyParser = require('body-parser');
 
 const app = express();
@@ -26,7 +26,7 @@ const pool = new Pool({
 app.use(cors());
 app.use(bodyParser.json());
 
-// Key zur Signierung und Verifizierung von JWT`s
+// Key zur Signierung und Verifizierung von JWTs
 const JWT_SECRET = 't&5*P$5QwA!R%8e@U6sY';
 
 // Überprüft die Gültigkeit eines JWTs im Authorization Header
@@ -47,7 +47,7 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// Registriert den Benutzer indem das Passwort und die Rolle in die Datenbank eingefügt wird
+// Registriert den Benutzer, indem das Passwort und die Rolle in die Datenbank eingefügt werden
 app.post('/register', async (req, res) => {
     const { username, password, role } = req.body;
 
@@ -64,7 +64,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// Authentifiziert einen Benutzer durch Überprüfung des Benutzernamen und Passworts und gibt ein JWT zurück
+// Authentifiziert einen Benutzer durch Überprüfung des Benutzernamens und Passworts und gibt ein JWT zurück
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -78,7 +78,7 @@ app.post('/login', async (req, res) => {
 
         const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
-        //Ausgabe des Tokens auf der Konsole zur Überprüfung
+        // Ausgabe des Tokens auf der Konsole zur Überprüfung
         console.log('Token:', token);
 
         res.json({ token });
@@ -88,15 +88,25 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Gibt alle vorhandenen todos zurück wenn der Benutzer ein Admin ist, anonsten nur todos des angemeldeten Benutzers
+// Gibt alle vorhandenen To-Dos zurück, wenn der Benutzer ein Admin ist, ansonsten nur To-Dos des angemeldeten Benutzers
 app.get('/todos', verifyToken, async (req, res) => {
     try {
         let result;
         if (req.userRole === 'admin') {
-            result = await pool.query('SELECT * FROM todos');
+            result = await pool.query(`
+                SELECT todos.*, users.username 
+                FROM todos 
+                JOIN users ON todos.user_id = users.id
+            `);
         } else {
-            result = await pool.query('SELECT * FROM todos WHERE user_id = $1', [req.userId]);
+            result = await pool.query(`
+                SELECT todos.*, users.username 
+                FROM todos 
+                JOIN users ON todos.user_id = users.id 
+                WHERE user_id = $1
+            `, [req.userId]);
         }
+        console.log('Fetched todos:', result.rows); // Log to check the fetched todos
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching todos:', err);
@@ -104,7 +114,7 @@ app.get('/todos', verifyToken, async (req, res) => {
     }
 });
 
-// Fügt neue todos in die Datenbank ein
+// Fügt neue To-Dos in die Datenbank ein
 app.post('/todos', verifyToken, async (req, res) => {
     const { text } = req.body;
     const userId = req.userId;
@@ -118,14 +128,20 @@ app.post('/todos', verifyToken, async (req, res) => {
             'INSERT INTO todos (text, completed, user_id) VALUES ($1, $2, $3) RETURNING *',
             [text, false, userId]
         );
-        res.json(newTodo.rows[0]);
+        const createdTodo = newTodo.rows[0];
+
+        // Füge den Benutzernamen hinzu
+        const userResult = await pool.query('SELECT username FROM users WHERE id = $1', [userId]);
+        createdTodo.username = userResult.rows[0].username;
+
+        res.json(createdTodo);
     } catch (error) {
         console.error('Error creating todo:', error);
         res.status(500).json({ error: 'Error creating todo' });
     }
 });
 
-// Aktualisiert todos in der Datenbank
+// Aktualisiert To-Dos in der Datenbank
 app.put('/todos/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     const { text, completed } = req.body;
@@ -147,14 +163,20 @@ app.put('/todos/:id', verifyToken, async (req, res) => {
             'UPDATE todos SET text = $1, completed = $2 WHERE id = $3 RETURNING *',
             [text, completed, id]
         );
-        res.json(result.rows[0]);
+        const updatedTodo = result.rows[0];
+
+        // Füge den Benutzernamen hinzu
+        const userResult = await pool.query('SELECT username FROM users WHERE id = $1', [todo.user_id]);
+        updatedTodo.username = userResult.rows[0].username;
+
+        res.json(updatedTodo);
     } catch (err) {
         console.error('Error updating todo:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-// löscht todos in der Datenbank
+// Löscht To-Dos in der Datenbank
 app.delete('/todos/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
 
