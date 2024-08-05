@@ -3,6 +3,7 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
+// Main App component
 function App() {
     const [todos, setTodos] = useState([]);
     const [user, setUser] = useState(null);
@@ -10,12 +11,14 @@ function App() {
     const [showInput, setShowInput] = useState(false);
     const [newTodoText, setNewTodoText] = useState('');
 
+    // Run fetchTodos() when token changes
     useEffect(() => {
         if (token) {
             fetchTodos();
         }
     }, [token]);
 
+    // Fetch todos from the server
     const fetchTodos = async () => {
         try {
             const response = await axios.get('http://localhost:3001/todos', {
@@ -27,6 +30,7 @@ function App() {
         }
     };
 
+    // add a new todo
     const addTodo = async () => {
         try {
             const response = await axios.post('http://localhost:3001/todos', { text: newTodoText }, {
@@ -40,6 +44,7 @@ function App() {
         }
     };
 
+    // toggle the status of todos (completed/not completed)
     const toggleTodo = async (id, completed) => {
         const todo = todos.find(todo => todo.id === id);
         if (!todo) {
@@ -57,6 +62,7 @@ function App() {
         }
     };
 
+    // change text of a todo
     const changeTodo = async (id) => {
         const newText = prompt('Enter new text:');
         if (!newText) return;
@@ -71,6 +77,7 @@ function App() {
         }
     };
 
+    // delete a todo
     const deleteTodo = async (id) => {
         try {
             await axios.delete(`http://localhost:3001/todos/${id}`, {
@@ -82,6 +89,7 @@ function App() {
         }
     };
 
+    // check login credentials and login
     const handleLogin = async (username, password) => {
         try {
             const response = await axios.post('http://localhost:3001/login', { username, password });
@@ -95,6 +103,7 @@ function App() {
         }
     };
 
+    // register new user
     const handleRegister = async (username, password, role) => {
         try {
             await axios.post('http://localhost:3001/register', { username, password, role });
@@ -104,6 +113,7 @@ function App() {
         }
     };
 
+    // removes login credentials so user is going to get logged out
     const handleLogout = () => {
         setToken('');
         localStorage.removeItem('token');
@@ -143,8 +153,8 @@ function App() {
                         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                             <h1 className="h4 m-0">My ToDo List</h1>
                             <div>
-                                <button className="btn btn-light btn-sm ms-auto me-2" onClick={() => setShowInput(true)}>Create</button>
-                                <button className="btn btn-danger btn-sm" onClick={handleLogout}>Logout</button>
+                                <button className="btn btn-light btn-sm ms-auto me-2" data-testid={`create-todo-button`} onClick={() => setShowInput(true)}>Create</button>
+                                <button className="btn btn-danger btn-sm" data-testid={`logout-button`} onClick={handleLogout}>Logout</button>
                             </div>
                         </div>
                         <div className="card-body">
@@ -157,13 +167,16 @@ function App() {
                                         placeholder="Enter new todo"
                                         value={newTodoText}
                                         onChange={(e) => setNewTodoText(e.target.value)}
+                                        data-testid={`new-todo-input`}
                                     />
-                                    <button className="btn btn-primary mt-2" onClick={addTodo}>Add Todo</button>
+                                    <button className="btn btn-primary mt-2" data-testid={`add-todo-button`} onClick={addTodo}>Add Todo</button>
                                 </div>
                             )}
                             <div className="list-group">
                                 {todos.map(todo => (
-                                    <div key={todo.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                    <div key={todo.id}
+                                         className="list-group-item d-flex justify-content-between align-items-center"
+                                         data-testid={`todo-item-${todo.id}`}>
                                         <div className="d-flex flex-column">
                                             <span className="todo-text">{todo.text}</span>
                                             {user && user.role !== 'user' && (
@@ -176,9 +189,16 @@ function App() {
                                                 className="form-check-input me-3"
                                                 checked={todo.completed}
                                                 onChange={() => toggleTodo(todo.id, todo.completed)}
+                                                data-testid={`todo-checkbox-${todo.id}`}
                                             />
-                                            <button className="btn btn-warning btn-sm me-2 custom-change-btn" onClick={() => changeTodo(todo.id)}>Update</button>
-                                            <button className="btn btn-danger btn-sm" onClick={() => deleteTodo(todo.id)}>Delete</button>
+                                            <button className="btn btn-warning btn-sm me-2 custom-change-btn"
+                                                    data-testid={`update-todo-button-${todo.id}`}
+                                                    onClick={() => changeTodo(todo.id)}>Update
+                                            </button>
+                                            <button className="btn btn-danger btn-sm"
+                                                    data-testid={`delete-todo-button-${todo.id}`}
+                                                    onClick={() => deleteTodo(todo.id)}>Delete
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -191,7 +211,7 @@ function App() {
     );
 }
 
-function Login({ onLogin }) {
+function Login({onLogin}) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -208,6 +228,7 @@ function Login({ onLogin }) {
                     type="text"
                     className="form-control"
                     value={username}
+                    data-testid="username"
                     onChange={(e) => setUsername(e.target.value)}
                 />
             </div>
@@ -217,10 +238,11 @@ function Login({ onLogin }) {
                     type="password"
                     className="form-control"
                     value={password}
+                    data-testid="password"
                     onChange={(e) => setPassword(e.target.value)}
                 />
             </div>
-            <button type="submit" className="btn btn-primary">Login</button>
+            <button type="submit" className="btn btn-primary" data-testid="login-button">Login</button>
         </form>
     );
 }

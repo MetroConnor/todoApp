@@ -1,20 +1,13 @@
-// Web-Framework für Node.js
 const express = require('express');
-// Bibliothek zum Hashing von Passwörtern
 const bcrypt = require('bcryptjs');
-// Bibliothek zum Erstellen und Verifizieren von JSON Web Tokens
 const jwt = require('jsonwebtoken');
-// PostgreSQL-Client für Node.js
 const { Pool } = require('pg');
-// Middleware für Cross-Origin Ressource Sharing
 const cors = require('cors');
-// Middleware zum Parsen von JSON-Request Bodies
 const bodyParser = require('body-parser');
-
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
-// Konfiguriert den PSQL-Client mit Standardwerten
+// Configure the PSQL client with default values
 const pool = new Pool({
     user: process.env.PGUSER || 'mustermann',
     host: process.env.PGHOST || 'database',
@@ -24,12 +17,13 @@ const pool = new Pool({
 });
 
 app.use(cors());
+app.use(express.json());
 app.use(bodyParser.json());
 
-// Key zur Signierung und Verifizierung von JWTs
+// Key for signing and verifying JWTs
 const JWT_SECRET = 't&5*P$5QwA!R%8e@U6sY';
 
-// Überprüft die Gültigkeit eines JWTs im Authorization Header
+// Verifies the validity of a JWT in the Authorization header
 const verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
 
@@ -41,13 +35,13 @@ const verifyToken = (req, res, next) => {
         if (err) {
             return res.status(401).json({ error: 'Failed to authenticate token' });
         }
-        req.userId = decoded.id; // Setze die userID aus dem Token in den Request
-        req.userRole = decoded.role; // Setze die Rolle aus dem Token in den Request
+        req.userId = decoded.id; // Set the userID from the token in the request
+        req.userRole = decoded.role; // Set the role from the token in the request
         next();
     });
 };
 
-// Registriert den Benutzer, indem das Passwort und die Rolle in die Datenbank eingefügt werden
+// Registers the user by inserting the password and role into the database
 app.post('/register', async (req, res) => {
     const { username, password, role } = req.body;
 
@@ -64,7 +58,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// Authentifiziert einen Benutzer durch Überprüfung des Benutzernamens und Passworts und gibt ein JWT zurück
+// Authenticates a user by verifying the username and password and returns a JWT
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -78,7 +72,7 @@ app.post('/login', async (req, res) => {
 
         const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
-        // Ausgabe des Tokens auf der Konsole zur Überprüfung
+        // Log the token to the console for verification
         console.log('Token:', token);
 
         res.json({ token });
@@ -88,7 +82,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Gibt alle vorhandenen To-Dos zurück, wenn der Benutzer ein Admin ist, ansonsten nur To-Dos des angemeldeten Benutzers
+// Returns all existing todos if the user is an admin, otherwise only the todos of the logged-in user
 app.get('/todos', verifyToken, async (req, res) => {
     try {
         let result;
@@ -114,7 +108,7 @@ app.get('/todos', verifyToken, async (req, res) => {
     }
 });
 
-// Fügt neue To-Dos in die Datenbank ein
+// Inserts new todos into the database
 app.post('/todos', verifyToken, async (req, res) => {
     const { text } = req.body;
     const userId = req.userId;
@@ -130,7 +124,7 @@ app.post('/todos', verifyToken, async (req, res) => {
         );
         const createdTodo = newTodo.rows[0];
 
-        // Füge den Benutzernamen hinzu
+        // Add the username
         const userResult = await pool.query('SELECT username FROM users WHERE id = $1', [userId]);
         createdTodo.username = userResult.rows[0].username;
 
@@ -141,7 +135,7 @@ app.post('/todos', verifyToken, async (req, res) => {
     }
 });
 
-// Aktualisiert To-Dos in der Datenbank
+// Updates todos in the database
 app.put('/todos/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     const { text, completed } = req.body;
@@ -165,7 +159,7 @@ app.put('/todos/:id', verifyToken, async (req, res) => {
         );
         const updatedTodo = result.rows[0];
 
-        // Füge den Benutzernamen hinzu
+        // Add the username to the todo
         const userResult = await pool.query('SELECT username FROM users WHERE id = $1', [todo.user_id]);
         updatedTodo.username = userResult.rows[0].username;
 
@@ -176,7 +170,7 @@ app.put('/todos/:id', verifyToken, async (req, res) => {
     }
 });
 
-// Löscht To-Dos in der Datenbank
+// Deletes todos from the database
 app.delete('/todos/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
 
@@ -204,3 +198,5 @@ app.delete('/todos/:id', verifyToken, async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
+
+module.exports = app;

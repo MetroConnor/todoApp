@@ -31,6 +31,8 @@ services:
     networks:
       - todoapp-network
     restart: always
+    # Optional: Set working_dir to ensure tests are run from the correct directory
+    working_dir: /app
 
   frontend:
     build: ./todo-app
@@ -39,6 +41,24 @@ services:
     networks:
       - todoapp-network
     restart: always
+
+  test:
+    build: ./todo-backend
+    command: npm test
+    depends_on:
+      - database
+    environment:
+      PGUSER: mustermann
+      PGHOST: database
+      PGDATABASE: todoapp
+      PGPASSWORD: mustermann
+      PGPORT: 5432
+    networks:
+      - todoapp-network
+    restart: on-failure
+    working_dir: /app
+    volumes:
+      - ./todo-backend:/app
 
 networks:
   todoapp-network:
