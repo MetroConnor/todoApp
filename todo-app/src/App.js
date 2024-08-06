@@ -10,6 +10,7 @@ function App() {
     const [token, setToken] = useState(localStorage.getItem('token') || '');
     const [showInput, setShowInput] = useState(false);
     const [newTodoText, setNewTodoText] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     // Run fetchTodos() when token changes
     useEffect(() => {
@@ -100,6 +101,11 @@ function App() {
             await fetchTodos();
         } catch (error) {
             console.error('Error logging in:', error);
+            if (error.response && error.response.status === 401) {
+                setErrorMessage('Username oder Passwort ungültig');
+            } else {
+                setErrorMessage('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
+            }
         }
     };
 
@@ -143,7 +149,7 @@ function App() {
             {!user ? (
                 <div>
                     <h2>Login</h2>
-                    <Login onLogin={handleLogin} />
+                    <Login onLogin={handleLogin} errorMessage={errorMessage}/>
                     <h2>Register</h2>
                     <Register onRegister={handleRegister} />
                 </div>
@@ -211,7 +217,7 @@ function App() {
     );
 }
 
-function Login({onLogin}) {
+function Login({onLogin, errorMessage}) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -242,6 +248,7 @@ function Login({onLogin}) {
                     onChange={(e) => setPassword(e.target.value)}
                 />
             </div>
+            {errorMessage && <div className="alert alert-danger" role="alert">{errorMessage}</div>}
             <button type="submit" className="btn btn-primary" data-testid="login-button">Login</button>
         </form>
     );
