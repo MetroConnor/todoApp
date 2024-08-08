@@ -31,7 +31,7 @@ services:
     networks:
       - todoapp-network
     restart: always
-    # Optional: Set working_dir to ensure tests are run from the correct directory
+
     working_dir: /app
 
   frontend:
