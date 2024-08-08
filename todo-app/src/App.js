@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import Login from './components/Login';
+import Register from './components/Register';
 
 // Main App component
 function App() {
@@ -214,88 +216,6 @@ function App() {
                 </div>
             )}
         </div>
-    );
-}
-
-function Login({onLogin, errorMessage}) {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onLogin(username, password);
-    };
-
-    return (
-        <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-                <label className="form-label">Username</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={username}
-                    data-testid="username"
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Password</label>
-                <input
-                    type="password"
-                    className="form-control"
-                    value={password}
-                    data-testid="password"
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
-            {errorMessage && <div className="alert alert-danger" role="alert">{errorMessage}</div>}
-            <button type="submit" className="btn btn-primary" data-testid="login-button">Login</button>
-        </form>
-    );
-}
-
-function Register({ onRegister }) {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('user');
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onRegister(username, password, role);
-    };
-
-    return (
-        <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-                <label className="form-label">Username</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Password</label>
-                <input
-                    type="password"
-                    className="form-control"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Role</label>
-                <select
-                    className="form-control"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                >
-                    <option value="user">User</option>
-                </select>
-            </div>
-            <button type="submit" className="btn btn-primary">Register</button>
-        </form>
     );
 }
 

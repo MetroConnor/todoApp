@@ -1,6 +1,6 @@
 const request = require('supertest');
 const { expect } = require('chai');
-const app = require('../index.js');
+const { app, pool } = require('../index.js');
 
 describe('Auth Endpoints', () => {
     let token;
