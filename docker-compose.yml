@@ -33,6 +33,8 @@ services:
     restart: always
 
     working_dir: /app
+    volumes:
+      - ./todo-backend:/app
 
   frontend:
     build: ./todo-app

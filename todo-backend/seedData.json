@@ -1,0 +1,72 @@
+{
+  "users": [
+    {
+      "id": 41,
+      "username": "testuser",
+      "password": "$2a$10$CXsq3PM/VWjEI6Gu36d/Fu7w8RQNJEQBju5uS.4873R70hItJq62e",
+      "role": "user"
+    },
+    {
+      "id": 42,
+      "username": "chef",
+      "password": "$2a$10$N73NEURIfZWA5m9GBBk6E.Qiw7eatByXyLWWJYF8del2G8KE0spe2",
+      "role": "admin"
+    },
+    {
+      "id": 43,
+      "username": "user",
+      "password": "$2a$10$bvNzbcykRTVstWhITyxAX.87L0vCgiei6jvVKcCCMOCtQKjmd0N/O",
+      "role": "user"
+    },
+    {
+      "id": 44,
+      "username": "admin",
+      "password": "$2a$10$umU3TDvV6geBg4l1FV/oGurj7ht1.It9m35Ecr6MVpY.ZYg8z8vde",
+      "role": "admin"
+    },
+    {
+      "id": 45,
+      "username": "apfel",
+      "password": "$2a$10$0Mpj36H6BbKw2kraDR8afef1yxu07bAfj3pjYNfswfR2kFHCDCl5K",
+      "role": "user"
+    }
+  ],
+  "todos": [
+    {
+      "id": 82,
+      "text": "Dies ist ein normaler User",
+      "completed": false,
+      "user_id": 43
+    },
+    {
+      "id": 81,
+      "text": "Dies ist ein Admin Todo",
+      "completed": false,
+      "user_id": 42
+    },
+    {
+      "id": 96,
+      "text": "just for testing",
+      "completed": false,
+      "user_id": 41
+    },
+    {
+      "id": 132,
+      "text": "Test for migration",
+      "completed": false,
+      "user_id": 42
+    },
+    {
+      "id": 83,
+      "text": "Dies ist auch ein Admin Todo",
+      "completed": false,
+      "user_id": 44
+    },
+    {
+      "id": 91,
+      "text": "todo test",
+      "completed": false,
+      "user_id": 45
+    }
+  ]
+}

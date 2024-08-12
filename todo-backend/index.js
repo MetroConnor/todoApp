@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const fs = require("fs");
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -40,6 +41,36 @@ const verifyToken = (req, res, next) => {
         next();
     });
 };
+
+const seedDatabase = async () => {
+    try {
+        const data = JSON.parse(fs.readFileSync('seedData.json', 'utf-8'));
+
+        console.log('Daten geladen:', data); // Debugging-Zeile
+
+        for (const user of data.users) {
+            await pool.query(`
+                INSERT INTO users (id, username, password, role) VALUES
+                ($1, $2, $3, $4)
+                ON CONFLICT (id) DO NOTHING;
+            `, [user.id, user.username, user.password, user.role]);
+        }
+
+        for (const todo of data.todos) {
+            await pool.query(`
+                INSERT INTO todos (id, text, completed, user_id) VALUES
+                ($1, $2, $3, $4)
+                ON CONFLICT (id) DO NOTHING;
+            `, [todo.id, todo.text, todo.completed, todo.user_id]);
+        }
+
+        console.log('Seed-Daten erfolgreich eingefügt.');
+    } catch (err) {
+        console.error('Fehler beim Einfügen der Seed-Daten:', err);
+    }
+};
+
+seedDatabase();
 
 // Registers the user by inserting the password and role into the database
 app.post('/register', async (req, res) => {

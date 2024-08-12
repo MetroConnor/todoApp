@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "nyc --reporter=html --reporter=text mocha 'backend-tests/auth.test.cjs' 'backend-tests/unit.test.cjs.js'"
+    "seed": "node exportData.js",
+    "test": "nyc --reporter=html --reporter=text mocha 'backend-tests/auth.test.cjs' 'backend-tests/unit.test.cjs.js'",
+    "start:dev": "npm run seed && npm run start"
   },
   "keywords": [],
   "author": "",
